@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import express from 'express';
 import queryString from 'query-string';
 import httpStatus from 'http-status';
 import dayjs from 'dayjs';
@@ -6,28 +7,24 @@ import relativeTime from 'dayjs/plugin/relativeTime.js';
 dayjs.extend(relativeTime);
 import https from 'https';
 import zlib from 'zlib';
-import http from 'http';
-import url from 'url';
 import fs from 'fs';
+import path from 'path';
 
 const E = process.env;
-const CARD = fs.readFileSync('card.svg', 'utf8');
-const LOGO = fs.readFileSync('logo.svg', 'utf8');
+const CARD = fs.readFileSync(new URL('./public/card.svg', import.meta.url), 'utf8');
+const LOGO = fs.readFileSync(new URL('./public/logo.svg', import.meta.url), 'utf8');
 const HEADERS = {
   'Content-Type': 'image/svg+xml',
   'Access-Control-Allow-Origin': `${E.DOMAIN || 'http://localhost'}`,
   'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept'
 };
 
+const app = express();
 
+// 设置静态文件目录
+app.use(express.static('public'));
 
-
-/**
- * 发送 HTTP 请求
- * @param {string} pth - 请求路径
- * @param {string} [method='GET'] - HTTP 方法
- * @returns {Promise} 返回包含响应数据的 Promise
- */
+// 请求函数
 function request(pth, method='GET') {
   return new Promise((fres, frej) => {
     const opts = {
@@ -75,12 +72,7 @@ function request(pth, method='GET') {
   });
 }
 
-
-/**
- * 解析查询参数
- * @param {object} qry - 查询参数对象
- * @returns {object} 包含 width, height, margin 的对象
- */
+// 解析参数
 function argument(qry) {
   const width  = parseFloat(qry.width)  || 384;
   const height = parseFloat(qry.height) || 56;
@@ -88,12 +80,7 @@ function argument(qry) {
   return {width, height, margin};
 }
 
-
-/**
- * 获取包信息
- * @param {string} name - 包名称
- * @returns {Promise} 返回包含包信息的 Promise
- */
+// 获取包信息
 function getPackageInfo(name) {
   return request(`https://ohpm.openharmony.cn/ohpmweb/registry/oh-package/openapi/v1/detail/${name}`).then(res => {
     const {body: pkg} = JSON.parse(res.body);
@@ -106,30 +93,18 @@ function getPackageInfo(name) {
     const updated = dayjs(mod).fromNow();
     return {install, dependencies, license, version, updated};
   }).catch(err => {
-    return {install: name, dependencies: '?', license: '?', version: '?', updated: '?'};});
+    return {install: name, dependencies: '?', license: '?', version: '?', updated: '?'};
+  });
 }
 
-
-/**
- * 计算 SVG 宽度
- * @param {number} org - 原始宽度
- * @param {string} ins - 安装命令
- * @param {string} upd - 更新时间
- * @returns {number} 计算后的宽度
- */
+// 计算 SVG 宽度
 function fitWidth(org, ins, upd) {
   const iw = 110 + (12 + ins.length) * 12 * 0.63;
   const uw = 240 + upd.length        * 11 * 0.63;
   return Math.round(Math.max(org, iw, uw));
 }
 
-
-/**
- * 生成 SVG 内容
- * @param {object} arg - 包含 width, height, margin 的参数对象
- * @param {object} pkg - 包信息对象
- * @returns {string} 生成的 SVG 字符串
- */
+// 生成 SVG
 function svg(arg, pkg) {
   let a = arg, p = pkg, c = CARD;
   a.width = fitWidth(a.width, p.install, p.updated);
@@ -144,19 +119,22 @@ function svg(arg, pkg) {
   return c.replace(/{{n.logo}}/g, LOGO);
 }
 
+// 导出 Vercel 无服务器函数
+export default app;
 
-const server = http.createServer((req, res) => {
-  if (req.url==='/') { res.writeHead(302, {'Location': `${E.DOMAIN}`}); return res.end(); }
-  const {path, search} = url.parse(req.url.toLowerCase());
-  const query = queryString.parse(search);
-  if (!path.endsWith('.svg')) return res.end();
-  const name = path.substring(1, path.length-4);
-  getPackageInfo(name).then(pkg => { 
-    res.writeHead(200, HEADERS);
-    res.end(svg(argument(query), pkg));
-  }, _ => res.end()).catch(err => {
-    res.end(err.message);
+// 处理根路径
+// 根路径加载 index.html
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/index.html'));
+});
+
+// 处理 SVG 请求
+app.get('/*.svg', (req, res) => {
+  const name = req.path.slice(1, -4).toLowerCase();
+  getPackageInfo(name).then(pkg => {
+    res.set(HEADERS);
+    res.send(svg(argument(req.query), pkg));
+  }).catch(err => {
+    res.status(500).send(err.message);
   });
 });
-console.log(`Server running at ${E.DOMAIN || 'http://localhost'}:${E.PORT || 80}/`);
-server.listen(E.PORT || 80);
