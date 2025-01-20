@@ -1,19 +1,11 @@
 {
   "version": 2,
   "builds": [
-    {
-      "src": "index.js",
-      "use": "@vercel/node"
-    }
+    { "src": "app.js", "use": "@vercel/node" },
+    { "src": "public/**", "use": "@vercel/static" }
   ],
   "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/"
-    }
-  ],
-  "env": {
-    "DOMAIN": "https://ohpmico.vercel.app",
-    "PORT": "80"
-  }
+    { "src": "/public/(.*)", "dest": "/public/$1" },
+    { "src": "(.*)", "dest": "app.js" }
+  ]
 }
