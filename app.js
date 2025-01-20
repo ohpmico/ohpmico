@@ -132,8 +132,8 @@ app.get('/', (req, res) => {
 });
 
 // 处理 SVG 请求
-app.get('/:name.svg', (req, res) => {
-  const name = req.params.name.toLowerCase();
+app.get('/*.svg', (req, res) => {
+  const name = req.path.slice(1, -4).toLowerCase();
   getPackageInfo(name).then(pkg => {
     res.set(HEADERS);
     res.send(svg(argument(req.query), pkg));
