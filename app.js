@@ -123,12 +123,9 @@ function svg(arg, pkg) {
 export default app;
 
 // 处理根路径
+// 根路径重定向到 index.html
 app.get('/', (req, res) => {
-  res.send(`
-    <h1>OHPM Package Badge Service</h1>
-    <p>Usage: /:packageName.svg</p>
-    <p>Example: <a href="/@pura/harmony-utils.svg">/@pura/harmony-utils.svg</a></p>
-  `);
+  res.redirect('/index.html');
 });
 
 // 处理 SVG 请求
