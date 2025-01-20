@@ -1,0 +1,36 @@
+{
+  "type": "module",
+  "name": "ohpmico",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ohpm",
+    "harmonyos",
+    "card",
+    "npm",
+    "scoped",
+    "badge",
+    "image"
+  ],
+  "author": "hu-qi <huqi1024@gmail.com>",
+  "license": "MIT",
+  "description": "Display info card image for OHPM packages (scoped).",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hu-qi/ohpmico.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hu-qi/ohpmico/issues"
+  },
+  "homepage": "https://github.com/hu-qi/ohpmico#readme",
+  "dependencies": {
+    "dayjs": "^1.11.13",
+    "dotenv": "^16.4.7",
+    "http-status": "^2.1.0",
+    "query-string": "^9.1.1"
+  }
+}

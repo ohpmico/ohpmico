@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: huqi
+    given-names: huqi
+    orcid: https://orcid.org/0009-0002-2052-6563
+title: "ohpmico/ohpmico: Display info card image for OHPM packages (scoped)"
+version: 1.0.5
+doi: 10.5281/zenodo.14695412
+date-released: 2025-01-20
