@@ -123,9 +123,9 @@ function svg(arg, pkg) {
 export default app;
 
 // 处理根路径
-// 根路径重定向到 index.html
+// 根路径加载 index.html
 app.get('/', (req, res) => {
-  res.redirect('/index.html');
+  res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
 // 处理 SVG 请求
