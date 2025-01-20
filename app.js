@@ -90,7 +90,7 @@ function getPackageInfo(name) {
     const dependencies = deps + ' dependenc' + (deps!==1? 'ies' : 'y');
     const license = pkg.license;
     const version = pkg.version;
-    const updated = dayjs(mod).fromNow();
+    const updated = dayjs(new Date(mod)).fromNow();
     return {install, dependencies, license, version, updated};
   }).catch(err => {
     return {install: name, dependencies: '?', license: '?', version: '?', updated: '?'};
